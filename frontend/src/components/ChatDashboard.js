@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useSocket } from "../contexts/SocketContext";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
 import CryptoJS from "crypto-js";
 import {
@@ -33,7 +32,6 @@ const ChatDashboard = () => {
   const { user, logout, loading } = useAuth();
   const { socket } = useSocket();
   console.log("Socket:", socket);
-  const navigate = useNavigate();
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [rooms, setRooms] = useState([]);
   const [messages, setMessages] = useState([]);
@@ -41,52 +39,51 @@ const ChatDashboard = () => {
   const [typingUsers, setTypingUsers] = useState([]);
 
   // Demo E2E key derivation (in production, use Diffie-Hellman or shared secret exchange)
-  const getEncryptionKey = (roomId) => {
-    if (!user || !user._id || !roomId) {
-      console.error("❌ Missing key data", { user, roomId });
-      return null;
-    }
+  //const getEncryptionKey = (roomId) => {
+  //  if (!user || !user._id || !roomId) {
+  //    console.error("❌ Missing key data", { user, roomId });
+  //    return null;
+  //  }
 
-    const secret = `shared_secret_${roomId}_${user._id}`;
+  //  const secret = `shared_secret_${roomId}_${user._id}`;
 
-    // ✅ FIX: use SHA256 instead of substring
-    return CryptoJS.SHA256(secret);
-  };
+  //  // ✅ FIX: use SHA256 instead of substring
+  //  return CryptoJS.SHA256(secret);
+  // };
 
-  const encryptMessage = (text, roomId) => {
-    if (!text) return "";
+  //const encryptMessage = (text, roomId) => {
+  //  if (!text) return "";
 
-    const key = getEncryptionKey(roomId);
-    if (!key) return "";
+  //  const key = getEncryptionKey(roomId);
+  //  if (!key) return "";
 
-    return CryptoJS.AES.encrypt(text, key.toString()).toString();
-  };
+  //  return CryptoJS.AES.encrypt(text, key.toString()).toString();
+  //};
 
-  const decryptMessage = (encryptedText, roomId) => {
-    try {
-      if (!encryptedText) return "";
+  // const decryptMessage = (encryptedText, roomId) => {
+  //  try {
+  //    if (!encryptedText) return "";
 
-      const key = getEncryptionKey(roomId);
-      if (!key) return "";
+  //    const key = getEncryptionKey(roomId);
+  //    if (!key) return "";
 
-      const bytes = CryptoJS.AES.decrypt(encryptedText, key.toString());
-      return bytes.toString(CryptoJS.enc.Utf8);
-    } catch (err) {
-      return "[Unable to decrypt]";
-    }
-  };
+  //   const bytes = CryptoJS.AES.decrypt(encryptedText, key.toString());
+  //    return bytes.toString(CryptoJS.enc.Utf8);
+  //  } catch (err) {
+  //    return "[Unable to decrypt]";
+  //  }
+  //};
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (loading || !user || !socket) return;
 
-    // Fetch rooms
     axios
       .get(`${process.env.REACT_APP_API_URL}/api/chat/rooms`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       .then((res) => setRooms(res.data));
 
-    // Socket listeners
     socket.on("message", (msg) => {
       setMessages((prev) => [...prev, msg]);
     });
@@ -103,7 +100,7 @@ const ChatDashboard = () => {
       socket.off("message");
       socket.off("typing");
     };
-  }, [socket, user, loading]);
+  }, [socket]);
 
   useEffect(() => {
     if (!selectedRoom?._id) return;
@@ -293,7 +290,7 @@ const ChatDashboard = () => {
                   {messages.map((msg, i) => (
                     <Box
                       key={i}
-                      sx={{ mb: 1, ml: msg.sender._id === user.id ? 8 : 0 }}
+                      sx={{ mb: 1, ml: msg.sender._id === user._id ? 8 : 0 }}
                     >
                       <Box sx={{ display: "flex", alignItems: "flex-start" }}>
                         <Avatar sx={{ width: 32, height: 32, mr: 1 }}>
