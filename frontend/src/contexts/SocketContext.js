@@ -19,7 +19,7 @@ const SocketContextProvider = ({ children }) => {
 
   useEffect(() => {
     if (token) {
-      socketRef.current = io("http://localhost:5000", {
+      socketRef.current = io("https://chat-app-eo5m.onrender.com", {
         auth: {
           token: token,
         },

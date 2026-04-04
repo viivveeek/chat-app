@@ -34,7 +34,7 @@ const Login = () => {
     onSubmit: async (values) => {
       try {
         const res = await axios.post(
-          "http://localhost:5000/api/auth/login",
+          "https://chat-app-eo5m.onrender.com/api/auth/login",
           values,
         );
         login(res.data.user, res.data.token);

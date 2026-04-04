@@ -81,7 +81,7 @@ const ChatDashboard = () => {
 
     // Fetch rooms
     axios
-      .get("http://localhost:5000/api/chat/rooms", {
+      .get(`${process.env.REACT_APP_API_URL}/api/chat/rooms`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       .then((res) => setRooms(res.data));
@@ -118,7 +118,7 @@ const ChatDashboard = () => {
 
     axios
       .get(
-        `http://localhost:5000/api/chat/rooms/${selectedRoom._id}/messages`,
+        `${process.env.REACT_APP_API_URL}/api/chat/rooms/${selectedRoom._id}/messages`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -185,7 +185,7 @@ const ChatDashboard = () => {
 
       try {
         res = await axios.post(
-          "http://localhost:5000/api/chat/rooms/join",
+          `${process.env.REACT_APP_API_URL}/api/chat/rooms/join`,
           { name: roomName },
           {
             headers: { Authorization: `Bearer ${token}` },
@@ -197,7 +197,7 @@ const ChatDashboard = () => {
         // ❌ If room doesn't exist → CREATE
         if (err.response?.status === 404) {
           res = await axios.post(
-            "http://localhost:5000/api/chat/rooms",
+            `${process.env.REACT_APP_API_URL}/api/chat/rooms`,
             {
               name: roomName,
               isPrivate: false,
