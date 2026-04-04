@@ -22,7 +22,7 @@ const server = http.createServer(app);
 // 1. Socket.io Configuration with Middleware Auth
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "https://chat-app-zix6.vercel.app",
     methods: ["GET", "POST"],
   },
 });
@@ -51,7 +51,7 @@ const limiter = rateLimit({
   max: 100,
 });
 app.use(limiter);
-app.use(cors({ origin: "http://localhost:3000" }));
+app.use(cors({ origin: "https://chat-app-zix6.vercel.app" }));
 app.use(express.json());
 
 // 3. MongoDB connection
