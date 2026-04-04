@@ -3,7 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useSocket } from "../contexts/SocketContext";
 import axios from "axios";
 
-import CryptoJS from "crypto-js";
+// import CryptoJS from "crypto-js";
 import {
   AppBar,
   Toolbar,
@@ -100,7 +100,7 @@ const ChatDashboard = () => {
       socket.off("message");
       socket.off("typing");
     };
-  }, [socket]);
+  }, [socket, user, loading]);
 
   useEffect(() => {
     if (!selectedRoom?._id) return;
@@ -126,7 +126,7 @@ const ChatDashboard = () => {
       .catch((err) => {
         console.error(err);
       });
-  }, [selectedRoom]);
+  }, [selectedRooms, socket]);
 
   const sendMessage = () => {
     console.log("👉 Raw message:", newMessage);
