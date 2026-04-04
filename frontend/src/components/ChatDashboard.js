@@ -126,7 +126,7 @@ const ChatDashboard = () => {
       .catch((err) => {
         console.error(err);
       });
-  }, [selectedRooms, socket]);
+  }, [selectedRoom, socket]);
 
   const sendMessage = () => {
     console.log("👉 Raw message:", newMessage);
