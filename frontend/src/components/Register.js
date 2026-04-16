@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useNavigate, Link } from "react-router-dom";
+import { toast } from "react-toastify";
 import {
   Container,
   Paper,
@@ -50,12 +51,13 @@ const Register = () => {
         login(res.data.user, res.data.token);
 
         // small delay for UX
-        setTimeout(() => navigate("/"), 500);
+        setTimeout(() => navigate("/"), 800);
       } catch (err) {
-        setFieldError(
-          "general",
-          err.response?.data?.error || "Registration failed",
-        );
+        const errorMsg = err.response?.data?.error || "Registration failed";
+
+        toast.error(errorMsg);
+
+        setFieldError("general", errorMsg);
       } finally {
         setSubmitting(false);
       }
