@@ -96,6 +96,10 @@ const ChatDashboard = () => {
       });
     });
 
+    socket.on("messagesSeen", () => {
+      setMessages((prev) => prev.map((m) => ({ ...m, status: "seen" })));
+    });
+
     return () => {
       socket.off("message");
       socket.off("typing");
@@ -111,6 +115,8 @@ const ChatDashboard = () => {
 
     if (socket) {
       socket.emit("joinRoom", selectedRoom._id);
+
+      socket.emit("markSeen", selectedRoom._id);
     }
 
     axios
@@ -300,6 +306,13 @@ const ChatDashboard = () => {
                           <Typography variant="caption">
                             {msg.sender.username} •{" "}
                             {new Date(msg.createdAt).toLocaleTimeString()}
+                            {msg.sender._id === user._id && (
+                              <>
+                                {msg.status === "sent" && " ✔"}
+                                {msg.status === "delivered" && " ✔✔"}
+                                {msg.status === "seen" && " ✔✔ (seen)"}
+                              </>
+                            )}
                           </Typography>
                           <Typography variant="body2">{msg.content}</Typography>
                         </Box>

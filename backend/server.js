@@ -88,9 +88,15 @@ const Message = require("./models/Message");
 io.on("connection", (socket) => {
   console.log("Authenticated user connected:", socket.user);
 
-  socket.on("joinRoom", (roomId) => {
+  socket.on("joinRoom", async (roomId) => {
     socket.join(roomId);
-    console.log(`User ${socket.user} joined room ${roomId}`);
+
+    await Message.updateMany(
+      { room: roomId, status: "sent" },
+      { status: "delivered" },
+    );
+
+    io.to(roomId).emit("messagesDelivered", roomId);
   });
 
   socket.on("sendMessage", async (data) => {
@@ -101,6 +107,7 @@ io.on("connection", (socket) => {
         content: data.content,
         sender: socket.user,
         room: data.roomId,
+        status: "sent",
         recipient: data.recipient,
       });
 
@@ -120,6 +127,15 @@ io.on("connection", (socket) => {
       roomId: data.roomId,
       isTyping: data.isTyping,
     });
+  });
+
+  socket.on("markSeen", async (roomId) => {
+    await Message.updateMany(
+      { room: roomId, status: { $ne: "seen" } },
+      { status: "seen" },
+    );
+
+    io.to(roomId).emit("messagesSeen");
   });
 
   socket.on("disconnect", () => {
