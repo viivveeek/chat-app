@@ -90,7 +90,7 @@ const Register = () => {
             gutterBottom
             fontWeight="bold"
           >
-            🚀 SecureChat
+            jarvis
           </Typography>
 
           <Typography
