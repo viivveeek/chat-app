@@ -90,7 +90,7 @@ const Register = () => {
             gutterBottom
             fontWeight="bold"
           >
-            jarvis
+            soblot
           </Typography>
 
           <Typography

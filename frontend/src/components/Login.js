@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useNavigate, Link } from "react-router-dom";
@@ -11,7 +11,11 @@ import {
   Box,
   Alert,
   Stack,
+  IconButton,
+  InputAdornment,
+  CircularProgress,
 } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -25,96 +29,132 @@ const loginSchema = Yup.object({
 const Login = () => {
   const { login, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+
   const formik = useFormik({
     initialValues: {
       email: "",
       password: "",
     },
     validationSchema: loginSchema,
-    onSubmit: async (values) => {
+    onSubmit: async (values, { setSubmitting, setFieldError }) => {
       try {
         const res = await axios.post(
           "https://chat-app-eo5m.onrender.com/api/auth/login",
           values,
         );
+
         login(res.data.user, res.data.token);
-        navigate("/");
+
+        setTimeout(() => navigate("/"), 500);
       } catch (err) {
-        formik.setFieldError(
-          "general",
-          err.response?.data?.error || "Login failed",
-        );
+        setFieldError("general", err.response?.data?.error || "Login failed");
+      } finally {
+        setSubmitting(false);
       }
     },
   });
 
-  if (authLoading) return <div>Loading...</div>;
+  if (authLoading) return <CircularProgress />;
 
   return (
     <Container maxWidth="sm">
       <Box
         sx={{
-          mt: 8,
+          minHeight: "100vh",
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
+          justifyContent: "center",
+          background: "linear-gradient(135deg, #667eea, #764ba2)",
         }}
       >
-        <Paper elevation={3} sx={{ p: 4, width: "100%" }}>
-          <Typography component="h1" variant="h4" align="center" gutterBottom>
-            Login to SecureChat
+        <Paper
+          elevation={6}
+          sx={{
+            p: 4,
+            width: "100%",
+            borderRadius: 3,
+          }}
+        >
+          <Typography
+            variant="h4"
+            align="center"
+            gutterBottom
+            fontWeight="bold"
+          >
+            🔐 SecureChat
           </Typography>
+
           <Typography
             variant="body2"
             color="text.secondary"
             align="center"
-            paragraph
+            mb={2}
           >
-            End-to-end encrypted messaging
+            Welcome back! Login to continue
           </Typography>
+
           {formik.errors.general && (
-            <Alert severity="error">{formik.errors.general}</Alert>
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {formik.errors.general}
+            </Alert>
           )}
-          <Box component="form" onSubmit={formik.handleSubmit} sx={{ mt: 1 }}>
+
+          <Box component="form" onSubmit={formik.handleSubmit}>
             <TextField
-              margin="normal"
               fullWidth
-              id="email"
+              margin="normal"
               label="Email"
               name="email"
-              autoComplete="email"
+              autoFocus
               value={formik.values.email}
               onChange={formik.handleChange}
               error={formik.touched.email && Boolean(formik.errors.email)}
               helperText={formik.touched.email && formik.errors.email}
-              autoFocus
             />
+
             <TextField
-              margin="normal"
               fullWidth
-              name="password"
+              margin="normal"
               label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
+              name="password"
+              type={showPassword ? "text" : "password"}
               value={formik.values.password}
               onChange={formik.handleChange}
               error={formik.touched.password && Boolean(formik.errors.password)}
               helperText={formik.touched.password && formik.errors.password}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowPassword(!showPassword)}>
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
+
             <Button
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              sx={{
+                mt: 3,
+                py: 1.3,
+                borderRadius: 2,
+                fontWeight: "bold",
+              }}
               disabled={formik.isSubmitting}
             >
-              {formik.isSubmitting ? "Signing In..." : "Sign In"}
+              {formik.isSubmitting ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                "Sign In"
+              )}
             </Button>
-            <Stack direction="row" justifyContent="space-between">
-              <Link to="/register" variant="body2">
-                {"Don't have an account? Sign Up"}
-              </Link>
+
+            <Stack mt={2} alignItems="center">
+              <Link to="/register">Don't have an account? Sign Up</Link>
             </Stack>
           </Box>
         </Paper>
