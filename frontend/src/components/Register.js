@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useNavigate, Link } from "react-router-dom";
@@ -11,7 +11,11 @@ import {
   Box,
   Alert,
   Stack,
+  IconButton,
+  InputAdornment,
+  CircularProgress,
 } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -27,6 +31,8 @@ const registerSchema = Yup.object({
 const Register = () => {
   const { login, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+
   const formik = useFormik({
     initialValues: {
       username: "",
@@ -34,101 +40,139 @@ const Register = () => {
       password: "",
     },
     validationSchema: registerSchema,
-    onSubmit: async (values) => {
+    onSubmit: async (values, { setSubmitting, setFieldError }) => {
       try {
         const res = await axios.post(
           "https://chat-app-eo5m.onrender.com/api/auth/register",
           values,
         );
+
         login(res.data.user, res.data.token);
-        navigate("/");
+
+        // small delay for UX
+        setTimeout(() => navigate("/"), 500);
       } catch (err) {
-        formik.setFieldError(
+        setFieldError(
           "general",
           err.response?.data?.error || "Registration failed",
         );
+      } finally {
+        setSubmitting(false);
       }
     },
   });
 
-  if (authLoading) return <div>Loading...</div>;
+  if (authLoading) return <CircularProgress />;
 
   return (
     <Container maxWidth="sm">
       <Box
         sx={{
-          mt: 8,
+          minHeight: "100vh",
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
+          justifyContent: "center",
+          background: "linear-gradient(135deg, #667eea, #764ba2)",
         }}
       >
-        <Paper elevation={3} sx={{ p: 4, width: "100%" }}>
-          <Typography component="h1" variant="h4" align="center" gutterBottom>
-            Join SecureChat
+        <Paper
+          elevation={6}
+          sx={{
+            p: 4,
+            width: "100%",
+            borderRadius: 3,
+            backdropFilter: "blur(10px)",
+          }}
+        >
+          <Typography
+            variant="h4"
+            align="center"
+            gutterBottom
+            fontWeight="bold"
+          >
+            🚀 SecureChat
           </Typography>
+
           <Typography
             variant="body2"
             color="text.secondary"
             align="center"
-            paragraph
+            mb={2}
           >
-            Create account for private, encrypted chats
+            Create your account and start chatting securely
           </Typography>
+
           {formik.errors.general && (
-            <Alert severity="error">{formik.errors.general}</Alert>
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {formik.errors.general}
+            </Alert>
           )}
-          <Box component="form" onSubmit={formik.handleSubmit} sx={{ mt: 1 }}>
+
+          <Box component="form" onSubmit={formik.handleSubmit}>
             <TextField
-              margin="normal"
               fullWidth
-              id="username"
+              margin="normal"
               label="Username"
               name="username"
-              autoComplete="username"
               value={formik.values.username}
               onChange={formik.handleChange}
               error={formik.touched.username && Boolean(formik.errors.username)}
               helperText={formik.touched.username && formik.errors.username}
             />
+
             <TextField
-              margin="normal"
               fullWidth
-              id="email"
+              margin="normal"
               label="Email"
               name="email"
-              autoComplete="email"
               value={formik.values.email}
               onChange={formik.handleChange}
               error={formik.touched.email && Boolean(formik.errors.email)}
               helperText={formik.touched.email && formik.errors.email}
             />
+
             <TextField
-              margin="normal"
               fullWidth
-              name="password"
+              margin="normal"
               label="Password"
-              type="password"
-              id="password"
-              autoComplete="new-password"
+              name="password"
+              type={showPassword ? "text" : "password"}
               value={formik.values.password}
               onChange={formik.handleChange}
               error={formik.touched.password && Boolean(formik.errors.password)}
               helperText={formik.touched.password && formik.errors.password}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowPassword(!showPassword)}>
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
+
             <Button
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              sx={{
+                mt: 3,
+                py: 1.3,
+                borderRadius: 2,
+                fontWeight: "bold",
+              }}
               disabled={formik.isSubmitting}
             >
-              {formik.isSubmitting ? "Creating..." : "Sign Up"}
+              {formik.isSubmitting ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                "Create Account"
+              )}
             </Button>
-            <Stack direction="row" justifyContent="space-between">
-              <Link to="/login" variant="body2">
-                {"Have account? Sign In"}
-              </Link>
+
+            <Stack mt={2} alignItems="center">
+              <Link to="/login">Already have an account? Sign In</Link>
             </Stack>
           </Box>
         </Paper>
