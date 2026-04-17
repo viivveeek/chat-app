@@ -1,3 +1,4 @@
+const [selectedFile, setSelectedFile] = useState(null);
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useSocket } from "../contexts/SocketContext";
@@ -177,34 +178,46 @@ const ChatDashboard = () => {
     };
   }, [socket]);
 
-  const sendMessage = () => {
-    console.log("👉 Raw message:", newMessage);
-    console.log("👉 Selected room:", selectedRoom);
-    console.log("👉 User:", user);
+  const sendMessage = async () => {
+    if (!selectedRoom?._id) return;
 
-    if (!newMessage.trim()) {
-      console.log("❌ Message empty");
+    // ✅ FILE SEND
+    if (selectedFile) {
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+
+      try {
+        const res = await axios.post(
+          `${process.env.REACT_APP_API_URL}/api/upload`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          },
+        );
+
+        socket.emit("sendMessage", {
+          roomId: selectedRoom._id,
+          content: res.data.fileUrl,
+          type: "file",
+        });
+
+        setSelectedFile(null);
+      } catch (err) {
+        console.error("Upload failed:", err);
+      }
+
       return;
     }
 
-    if (!selectedRoom?._id) {
-      console.log("❌ No room selected");
-      return;
-    }
-
-    if (!socket) {
-      console.log("❌ Socket not ready");
-      return;
-    }
-
-    // const encrypted = encryptMessage(newMessage, selectedRoom._id);
-    const encrypted = newMessage;
-
-    console.log("👉 Encrypted message:", encrypted);
+    // ✅ TEXT SEND
+    if (!newMessage.trim()) return;
 
     socket.emit("sendMessage", {
       roomId: selectedRoom._id,
-      content: encrypted,
+      content: newMessage,
+      type: "text",
     });
 
     setNewMessage("");
@@ -218,8 +231,6 @@ const ChatDashboard = () => {
       });
     }
   };
-
-  const [selectedFile, setSelectedFile] = useState(null);
 
   const handleCreateRoom = async () => {
     try {
