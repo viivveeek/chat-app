@@ -371,7 +371,22 @@ const ChatDashboard = () => {
                             )}
                           </Typography>
                           {msg.type === "file" ? (
-                            <img src={msg.content} alt="file" width="200" />
+                            msg.content.match(/\.(jpg|jpeg|png|gif)$/) ? (
+                              <img
+                                src={`${process.env.REACT_APP_API_URL}${msg.content}`}
+                                alt="file"
+                                width="200"
+                                style={{ borderRadius: 8 }}
+                              />
+                            ) : (
+                              <a
+                                href={`${process.env.REACT_APP_API_URL}${msg.content}`}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                📎 Open File
+                              </a>
+                            )
                           ) : (
                             <Typography variant="body2">
                               {msg.content}
@@ -436,5 +451,3 @@ const ChatDashboard = () => {
   );
 };
 export default ChatDashboard;
-
-// line 263 { decryptMessage(msg.content, selectedRoom._id);}
