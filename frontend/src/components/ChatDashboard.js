@@ -89,6 +89,10 @@ const ChatDashboard = () => {
       setMessages((prev) => [...prev, msg]);
     });
 
+    socket.on("messagesDelivered", () => {
+      setMessages((prev) => prev.map((m) => ({ ...m, status: "delivered" })));
+    });
+
     socket.on("typing", (data) => {
       setTypingUsers((prev) => {
         const newTyping = prev.filter((id) => id !== data.userId);
@@ -104,6 +108,8 @@ const ChatDashboard = () => {
     return () => {
       socket.off("message");
       socket.off("typing");
+      socket.off("messagesSeen");
+      socket.off("messagesDelivered");
     };
   }, [socket, user, loading]);
 
