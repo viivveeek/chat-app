@@ -349,53 +349,65 @@ const ChatDashboard = () => {
                   />
                 </Box>
                 <Box sx={{ flexGrow: 1, p: 2, overflow: "auto" }}>
-                  {messages.map((msg, i) => (
-                    <Box
-                      key={i}
-                      sx={{ mb: 1, ml: msg.sender._id === user._id ? 8 : 0 }}
-                    >
-                      <Box sx={{ display: "flex", alignItems: "flex-start" }}>
-                        <Avatar sx={{ width: 32, height: 32, mr: 1 }}>
-                          {msg.sender.username[0]}
-                        </Avatar>
-                        <Box>
-                          <Typography variant="caption">
-                            {msg.sender.username} •{" "}
-                            {new Date(msg.createdAt).toLocaleTimeString()}
-                            {msg.sender._id === user._id && (
-                              <>
-                                {msg.status === "sent" && " ✔"}
-                                {msg.status === "delivered" && " ✔✔"}
-                                {msg.status === "seen" && " ✔✔ (seen)"}
-                              </>
-                            )}
-                          </Typography>
-                          {msg.type === "file" ? (
-                            msg.content.match(/\.(jpg|jpeg|png|gif)$/) ? (
-                              <img
-                                src={`${process.env.REACT_APP_API_URL}${msg.content}`}
-                                alt="file"
-                                width="200"
-                                style={{ borderRadius: 8 }}
-                              />
-                            ) : (
-                              <a
-                                href={`${process.env.REACT_APP_API_URL}${msg.content}`}
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                📎 Open File
-                              </a>
-                            )
-                          ) : (
-                            <Typography variant="body2">
-                              {msg.content}
-                            </Typography>
-                          )}
+                  {messages.map(
+                    (msg, i) => (
+                      console.log(msg.content),
+                      (
+                        <Box
+                          key={i}
+                          sx={{
+                            mb: 1,
+                            ml: msg.sender._id === user._id ? 8 : 0,
+                          }}
+                        >
+                          <Box
+                            sx={{ display: "flex", alignItems: "flex-start" }}
+                          >
+                            <Avatar sx={{ width: 32, height: 32, mr: 1 }}>
+                              {msg.sender.username[0]}
+                            </Avatar>
+                            <Box>
+                              <Typography variant="caption">
+                                {msg.sender.username} •{" "}
+                                {new Date(msg.createdAt).toLocaleTimeString()}
+                                {msg.sender._id === user._id && (
+                                  <>
+                                    {msg.status === "sent" && " ✔"}
+                                    {msg.status === "delivered" && " ✔✔"}
+                                    {msg.status === "seen" && " ✔✔ (seen)"}
+                                  </>
+                                )}
+                              </Typography>
+                              {msg.type === "file" ? (
+                                msg.content.match(
+                                  /\.(jpg|jpeg|png|gif|webp)$/i,
+                                ) ? (
+                                  <img
+                                    src={msg.content}
+                                    alt="file"
+                                    width="200"
+                                    style={{ borderRadius: 8 }}
+                                  />
+                                ) : (
+                                  <a
+                                    href={msg.content}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                  >
+                                    📎 Open File
+                                  </a>
+                                )
+                              ) : (
+                                <Typography variant="body2">
+                                  {msg.content}
+                                </Typography>
+                              )}
+                            </Box>
+                          </Box>
                         </Box>
-                      </Box>
-                    </Box>
-                  ))}
+                      )
+                    ),
+                  )}
                   {typingUsers.length > 0 && (
                     <Typography variant="caption" color="text.secondary">
                       {typingUsers.length} typing...
