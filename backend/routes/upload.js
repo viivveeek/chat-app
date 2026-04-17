@@ -1,21 +1,32 @@
 const express = require("express");
-const multer = require("multer");
-const cloudinary = require("cloudinary").v2;
-
 const router = express.Router();
-const upload = multer({ dest: "uploads/" });
+const multer = require("multer");
+const path = require("path");
 
-cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.CLOUD_API_KEY,
-  api_secret: process.env.CLOUD_API_SECRET,
+// Storage config
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
 });
 
-router.post("/", upload.single("file"), async (req, res) => {
+const upload = multer({ storage });
+
+// Upload route
+router.post("/", upload.single("file"), (req, res) => {
   try {
-    const result = await cloudinary.uploader.upload(req.file.path);
-    res.json({ url: result.secure_url });
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    res.json({
+      fileUrl: `https://chat-app-eo5m.onrender.com/uploads/${req.file.filename}`,
+    });
   } catch (err) {
+    console.error("UPLOAD ERROR:", err);
     res.status(500).json({ error: "Upload failed" });
   }
 });
