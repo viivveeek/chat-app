@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useSocket } from "../contexts/SocketContext";
 import axios from "axios";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
 
 // import CryptoJS from "crypto-js";
 import {
@@ -218,6 +219,8 @@ const ChatDashboard = () => {
     }
   };
 
+  const [selectedFile, setSelectedFile] = useState(null);
+
   const handleCreateRoom = async () => {
     try {
       const roomName = prompt("Enter room name:");
@@ -393,18 +396,21 @@ const ChatDashboard = () => {
                 </Box>
                 <Box sx={{ p: 2, borderTop: 1, borderColor: "divider" }}>
                   <Box sx={{ display: "flex", alignItems: "center" }}>
-                    {/* ✅ FILE INPUT */}
-                    <input
-                      type="file"
-                      onChange={handleFile}
-                      style={{ marginRight: "10px" }}
-                    />
+                    {/* 📎 FILE BUTTON */}
+                    <IconButton component="label">
+                      <AttachFileIcon />
+                      <input
+                        type="file"
+                        hidden
+                        onChange={(e) => setSelectedFile(e.target.files[0])}
+                      />
+                    </IconButton>
 
                     {/* TEXT INPUT */}
                     <TextField
                       fullWidth
                       variant="outlined"
-                      placeholder="Type a message (E2E encrypted)"
+                      placeholder="Type a message..."
                       value={newMessage}
                       onChange={(e) => {
                         setNewMessage(e.target.value);
@@ -414,10 +420,16 @@ const ChatDashboard = () => {
                       onBlur={() => handleTyping(false)}
                     />
 
-                    {/* SEND BUTTON */}
+                    {/* 🔥 SEND BUTTON */}
                     <IconButton
                       color="primary"
-                      onClick={sendMessage}
+                      onClick={() => {
+                        if (selectedFile) {
+                          handleFileSend(); // 📁 send file
+                        } else {
+                          sendMessage(); // 💬 send text
+                        }
+                      }}
                       sx={{ ml: 1 }}
                     >
                       <SendIcon />
