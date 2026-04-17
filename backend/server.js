@@ -7,6 +7,7 @@ const dotenv = require("dotenv");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const jwt = require("jsonwebtoken");
+const uploadRoute = require("./routes/upload");
 
 const app = express();
 app.set("trust proxy", 1);
@@ -144,6 +145,8 @@ io.on("connection", (socket) => {
     console.log("User disconnected:", socket.id);
   });
 });
+
+app.use("/api/upload", uploadRoute);
 
 // 6. Server Start
 const PORT = process.env.PORT || 5000; // Aligned with your .env

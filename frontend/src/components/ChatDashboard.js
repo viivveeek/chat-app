@@ -85,8 +85,12 @@ const ChatDashboard = () => {
       .then((res) => setRooms(res.data));
 
     socket.on("message", (msg) => {
-      console.log("MESSAGE RECEIVED:", msg);
       setMessages((prev) => [...prev, msg]);
+
+      // ✅ send delivered event
+      if (msg.sender._id !== user._id) {
+        socket.emit("messageDelivered", { messageId: msg._id });
+      }
     });
 
     socket.on("messagesDelivered", () => {
@@ -140,6 +144,37 @@ const ChatDashboard = () => {
         console.error(err);
       });
   }, [selectedRoom, socket]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    // ✅ Delivered
+    socket.on("messageDelivered", ({ messageId }) => {
+      console.log("Delivered:", messageId);
+
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg._id === messageId ? { ...msg, status: "delivered" } : msg,
+        ),
+      );
+    });
+
+    // ✅ Seen
+    socket.on("messageSeen", ({ messageId }) => {
+      console.log("Seen:", messageId);
+
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg._id === messageId ? { ...msg, status: "seen" } : msg,
+        ),
+      );
+    });
+
+    return () => {
+      socket.off("messageDelivered");
+      socket.off("messageSeen");
+    };
+  }, [socket]);
 
   const sendMessage = () => {
     console.log("👉 Raw message:", newMessage);
@@ -238,6 +273,24 @@ const ChatDashboard = () => {
 
   if (loading) return <Typography>Loading...</Typography>;
 
+  const handleFile = async (e) => {
+    const file = e.target.files[0];
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await axios.post(
+      `${process.env.REACT_APP_API_URL}/api/upload`,
+      formData,
+    );
+
+    socket.emit("sendMessage", {
+      roomId: selectedRoom._id,
+      content: res.data.url,
+      type: "file",
+    });
+  };
+
   return (
     <>
       <AppBar position="static">
@@ -321,7 +374,13 @@ const ChatDashboard = () => {
                               </>
                             )}
                           </Typography>
-                          <Typography variant="body2">{msg.content}</Typography>
+                          {msg.type === "file" ? (
+                            <img src={msg.content} alt="file" width="200" />
+                          ) : (
+                            <Typography variant="body2">
+                              {msg.content}
+                            </Typography>
+                          )}
                         </Box>
                       </Box>
                     </Box>
@@ -333,7 +392,15 @@ const ChatDashboard = () => {
                   )}
                 </Box>
                 <Box sx={{ p: 2, borderTop: 1, borderColor: "divider" }}>
-                  <Box sx={{ display: "flex" }}>
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    {/* ✅ FILE INPUT */}
+                    <input
+                      type="file"
+                      onChange={handleFile}
+                      style={{ marginRight: "10px" }}
+                    />
+
+                    {/* TEXT INPUT */}
                     <TextField
                       fullWidth
                       variant="outlined"
@@ -346,6 +413,8 @@ const ChatDashboard = () => {
                       onKeyPress={(e) => e.key === "Enter" && sendMessage()}
                       onBlur={() => handleTyping(false)}
                     />
+
+                    {/* SEND BUTTON */}
                     <IconButton
                       color="primary"
                       onClick={sendMessage}
