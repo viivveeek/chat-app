@@ -103,12 +103,14 @@ io.on("connection", (socket) => {
     console.log("Message received:", data);
     try {
       // socket.user is now guaranteed to exist because of the middleware
+
       const message = new Message({
         content: data.content,
         sender: socket.user,
         room: data.roomId,
         status: "sent",
         recipient: data.recipient,
+        type: data.type || "text",
       });
 
       await message.save();

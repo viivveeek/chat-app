@@ -85,6 +85,7 @@ const ChatDashboard = () => {
       .then((res) => setRooms(res.data));
 
     socket.on("message", (msg) => {
+      console.log("MESSAGE RECEIVED:", msg);
       setMessages((prev) => [...prev, msg]);
     });
 

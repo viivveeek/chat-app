@@ -26,6 +26,10 @@ const messageSchema = new mongoose.Schema(
       enum: ["sent", "delivered", "seen"],
       default: "sent",
     },
+    type: {
+      type: String,
+      default: "text",
+    },
     isEncrypted: {
       type: Boolean,
       default: true,
