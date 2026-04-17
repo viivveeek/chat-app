@@ -1,4 +1,3 @@
-const [selectedFile, setSelectedFile] = useState(null);
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useSocket } from "../contexts/SocketContext";
@@ -39,6 +38,7 @@ const ChatDashboard = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [typingUsers, setTypingUsers] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   // Demo E2E key derivation (in production, use Diffie-Hellman or shared secret exchange)
   //const getEncryptionKey = (roomId) => {
@@ -287,24 +287,6 @@ const ChatDashboard = () => {
 
   if (loading) return <Typography>Loading...</Typography>;
 
-  const handleFile = async (e) => {
-    const file = e.target.files[0];
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const res = await axios.post(
-      `${process.env.REACT_APP_API_URL}/api/upload`,
-      formData,
-    );
-
-    socket.emit("sendMessage", {
-      roomId: selectedRoom._id,
-      content: res.data.url,
-      type: "file",
-    });
-  };
-
   return (
     <>
       <AppBar position="static">
@@ -434,13 +416,7 @@ const ChatDashboard = () => {
                     {/* 🔥 SEND BUTTON */}
                     <IconButton
                       color="primary"
-                      onClick={() => {
-                        if (selectedFile) {
-                          handleFileSend(); // 📁 send file
-                        } else {
-                          sendMessage(); // 💬 send text
-                        }
-                      }}
+                      onClick={sendMessage}
                       sx={{ ml: 1 }}
                     >
                       <SendIcon />
